@@ -242,7 +242,9 @@ getString = do
     liftIO $ vFlush (outputStream state)
     eof <- liftIO $ vIsEOF (inputStream state)
     assert (not eof) EndOfInputError
-    liftIO $ vGetLine (inputStream state)
+    str <- liftIO $ vGetLine (inputStream state)
+    put state { outputColumn = 0 }
+    return str
 
 -- | The number of seconds that have elapsed since midnight (local time).
 secondsSinceMidnight :: Code Int
@@ -255,7 +257,7 @@ secondsSinceMidnight = do
 seedRandom :: Int -> Code ()
 seedRandom i = modify (\state -> state { randomGen = (mkStdGen i) })
 
--- | Seeds the BAISC random number generator based on the number of
+-- | Seeds the BASIC random number generator based on the number of
 -- seconds since midnight.
 seedRandomFromTime :: Code ()
 seedRandomFromTime = secondsSinceMidnight >>= seedRandom
